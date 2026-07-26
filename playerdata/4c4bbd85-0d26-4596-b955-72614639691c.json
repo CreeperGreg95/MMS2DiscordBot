@@ -1,0 +1,47 @@
+{
+    "inventory": {
+        "0": {
+            "id": "mekanism:meka_tool",
+            "count": 1
+        },
+        "1": {
+            "id": "appliedenergistics2:wireless_terminal",
+            "count": 1
+        },
+        "2": {
+            "id": "minecraft:tnt",
+            "count": 21
+        },
+        "8": {
+            "id": "mekanism:portable_qio_dashboard",
+            "count": 1
+        },
+        "35": {
+            "id": "mekanism:configurator",
+            "count": 1
+        },
+        "100": {
+            "id": "mekanism:mekasuit_boots",
+            "count": 1
+        },
+        "101": {
+            "id": "mekanism:mekasuit_pants",
+            "count": 1
+        },
+        "102": {
+            "id": "mekanism:mekasuit_bodyarmor",
+            "count": 1
+        },
+        "103": {
+            "id": "mekanism:mekasuit_helmet",
+            "count": 1
+        }
+    },
+    "armor": {
+        "Bottes": "1x mekanism:mekasuit_boots",
+        "Jambières": "1x mekanism:mekasuit_pants",
+        "Plastron": "1x mekanism:mekasuit_bodyarmor",
+        "Casque": "1x mekanism:mekasuit_helmet"
+    },
+    "offhand": []
+}

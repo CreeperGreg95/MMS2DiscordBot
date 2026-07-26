@@ -1,0 +1,83 @@
+{
+    "inventory": {
+        "0": {
+            "id": "mekanism:meka_tool",
+            "count": 1
+        },
+        "1": {
+            "id": "appliedenergistics2:wireless_terminal",
+            "count": 1
+        },
+        "2": {
+            "id": "mekanism:portable_qio_dashboard",
+            "count": 1
+        },
+        "3": {
+            "id": "constructionwand:infinity_wand",
+            "count": 1
+        },
+        "8": {
+            "id": "xreliquary:lantern_of_paranoia",
+            "count": 1
+        },
+        "9": {
+            "id": "mekanism:mekasuit_bodyarmor",
+            "count": 1
+        },
+        "10": {
+            "id": "minecraft:torch",
+            "count": 64
+        },
+        "16": {
+            "id": "draconicevolution:chaotic_capacitor",
+            "count": 1
+        },
+        "17": {
+            "id": "draconicevolution:chaotic_capacitor",
+            "count": 1
+        },
+        "18": {
+            "id": "mekanism:network_reader",
+            "count": 1
+        },
+        "19": {
+            "id": "minecraft:torch",
+            "count": 61
+        },
+        "26": {
+            "id": "draconicevolution:chaotic_capacitor",
+            "count": 1
+        },
+        "27": {
+            "id": "securitycraft:universal_block_reinforcer_lvl3",
+            "count": 1
+        },
+        "28": {
+            "id": "mekanism:configurator",
+            "count": 1
+        },
+        "100": {
+            "id": "mekanism:mekasuit_boots",
+            "count": 1
+        },
+        "101": {
+            "id": "mekanism:mekasuit_pants",
+            "count": 1
+        },
+        "102": {
+            "id": "draconicevolution:chaotic_chestpiece",
+            "count": 1
+        },
+        "103": {
+            "id": "mekanism:mekasuit_helmet",
+            "count": 1
+        }
+    },
+    "armor": {
+        "Bottes": "1x mekanism:mekasuit_boots",
+        "Jambières": "1x mekanism:mekasuit_pants",
+        "Plastron": "1x draconicevolution:chaotic_chestpiece",
+        "Casque": "1x mekanism:mekasuit_helmet"
+    },
+    "offhand": []
+}

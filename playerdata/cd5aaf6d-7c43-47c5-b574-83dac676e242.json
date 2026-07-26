@@ -1,0 +1,95 @@
+{
+    "inventory": {
+        "0": {
+            "id": "mysticalagriculture:silicon_essence",
+            "count": 1
+        },
+        "1": {
+            "id": "minecraft:stone",
+            "count": 3
+        },
+        "2": {
+            "id": "mysticalagriculture:imperium_farmland",
+            "count": 1
+        },
+        "3": {
+            "id": "mysticalagriculture:emerald_seeds",
+            "count": 26
+        },
+        "5": {
+            "id": "create:cogwheel",
+            "count": 26
+        },
+        "6": {
+            "id": "appliedenergistics2:wireless_terminal",
+            "count": 1
+        },
+        "7": {
+            "id": "mekanism:meka_tool",
+            "count": 1
+        },
+        "8": {
+            "id": "mysticalagriculture:diamond_essence",
+            "count": 2
+        },
+        "9": {
+            "id": "mysticalagriculture:redstone_seeds",
+            "count": 1
+        },
+        "10": {
+            "id": "minecraft:torch",
+            "count": 38
+        },
+        "11": {
+            "id": "mysticalagriculture:diamond_seeds",
+            "count": 2
+        },
+        "14": {
+            "id": "mekanism:configurator",
+            "count": 1
+        },
+        "20": {
+            "id": "constructionwand:infinity_wand",
+            "count": 1
+        },
+        "21": {
+            "id": "mysticalagriculture:silicon_seeds",
+            "count": 1
+        },
+        "22": {
+            "id": "mysticalagriculture:emerald_essence",
+            "count": 2
+        },
+        "25": {
+            "id": "rftoolsstorage:modular_storage",
+            "count": 1
+        },
+        "33": {
+            "id": "mekanism:portable_teleporter",
+            "count": 1
+        },
+        "100": {
+            "id": "mekanism:mekasuit_boots",
+            "count": 1
+        },
+        "101": {
+            "id": "mekanism:mekasuit_pants",
+            "count": 1
+        },
+        "102": {
+            "id": "mekanism:mekasuit_bodyarmor",
+            "count": 1
+        },
+        "103": {
+            "id": "mekanism:mekasuit_helmet",
+            "count": 1
+        }
+    },
+    "armor": {
+        "Bottes": "1x mekanism:mekasuit_boots",
+        "Jambières": "1x mekanism:mekasuit_pants",
+        "Plastron": "1x mekanism:mekasuit_bodyarmor",
+        "Casque": "1x mekanism:mekasuit_helmet"
+    },
+    "offhand": []
+}
