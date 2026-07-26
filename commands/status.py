@@ -1,49 +1,23 @@
 import discord
 import os
 import re
-from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
 from mcstatus import JavaServer
+from mcrcon import MCRcon
 from dotenv import load_dotenv
 
-# Détecter le dossier racine du projet (1 niveau au-dessus de commands/)
+# Détecter le dossier racine du projet pour charger le .env
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Charger le .env depuis le dossier racine
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# Chemin absolu vers le log Minecraft
-MC_LOG_PATH = os.path.join(BASE_DIR, os.getenv("MC_LOG_PATH", "logs/latest.log"))
-
-RCON_HOST = os.getenv("RCON_HOST", "localhost")
-RCON_HOST_PLAYER = os.getenv("RCON_HOST_PLAYER")
-MC_SERVER_PORT = int(os.getenv("MC_SERVER_PORT", 25565))
-GUILD_ID = 1033271218247319562
-
-
-def get_server_start_info_and_versions():
-    start_time = None
-    mc_version = None
-    forge_version = None
-    try:
-        with open(MC_LOG_PATH, "r", encoding="utf-8") as f:
-            for line in f:
-                # Début du serveur
-                if "Starting minecraft server version" in line and start_time is None:
-                    date_str = line.split("]")[0].strip("[")
-                    start_time = datetime.strptime(date_str, "%d%b%Y %H:%M:%S.%f")
-                    mc_version = line.split("version")[1].strip()
-                
-                # Version Forge
-                elif "Forge mod loading" in line and forge_version is None:
-                    match = re.search(r"version (\d+\.\d+\.\d+)", line)
-                    if match:
-                        forge_version = match.group(1)
-    except Exception:
-        pass
-    return start_time, mc_version, forge_version
-
+# Configuration récupérée du .env
+RCON_HOST = os.getenv("RCON_HOST", "163.5.121.201")
+RCON_HOST_PLAYER = os.getenv("RCON_HOST_PLAYER", RCON_HOST)
+RCON_PORT = int(os.getenv("RCON_PORT", 25567))
+RCON_PASSWORD = os.getenv("RCON_PASSWORD")
+MC_SERVER_PORT = int(os.getenv("MC_SERVER_PORT", 25566))
+GUILD_ID = int(os.getenv("GUILD_ID", 1033271218247319562))
 
 class Status(commands.Cog):
     def __init__(self, bot):
@@ -51,54 +25,86 @@ class Status(commands.Cog):
 
     @app_commands.command(
         name="status",
-        description="Vérifie le statut et le ping du serveur Minecraft"
+        description="Affiche les détails techniques et le statut du serveur Minecraft"
     )
     @app_commands.guilds(discord.Object(id=GUILD_ID))
     async def status(self, interaction: discord.Interaction):
-        try:
-            server = JavaServer.lookup(f"{RCON_HOST}:{MC_SERVER_PORT}")
-            status = server.status()
-            ping_ms = round(status.latency)
-            num_players = status.players.online
-            status_text = "✅ Serveur en ligne"
-            color = discord.Color.green()
-        except Exception:
-            status_text = "❌ Serveur hors ligne"
-            ping_ms = None
-            num_players = None
-            color = discord.Color.red()
+        # 1. On prévient Discord que la requête peut prendre du temps (évite le timeout)
+        await interaction.response.defer()
 
-        start_time, mc_version, forge_version = get_server_start_info_and_versions()
-        if start_time:
-            uptime = datetime.now() - start_time
-            days, remainder = divmod(uptime.total_seconds(), 86400)
-            hours, remainder = divmod(remainder, 3600)
-            minutes, seconds = divmod(remainder, 60)
-            uptime_str = f"{int(days)}j {int(hours)}h {int(minutes)}m {int(seconds)}s"
-            start_str = start_time.strftime("%d/%m/%Y %H:%M:%S")
+        # Variables par défaut
+        online = False
+        mc_version = "Inconnue"
+        forge_version = "Inconnue"
+        players_online = 0
+        players_max = 0
+        ping = "N/A"
+        
+        # --- ÉTAPE 1 : Récupération via MCSTATUS (Port 25566) ---
+        try:
+            server = JavaServer.lookup(f"{RCON_HOST}:{MC_SERVER_PORT}", timeout=3)
+            query = server.status()
+            
+            online = True
+            players_online = query.players.online
+            players_max = query.players.max
+            ping = f"{round(query.latency)} ms"
+            mc_version = query.version.name # Récupère souvent "1.16.5" ou "Forge 1.16.5"
+        except Exception as e:
+            print(f"[DEBUG] Erreur mcstatus: {e}")
+
+        # --- ÉTAPE 2 : Récupération via RCON (Port 25567) si possible ---
+        # On utilise RCON pour essayer de trouver la version Forge précise
+        if RCON_PASSWORD:
+            try:
+                with MCRcon(RCON_HOST, RCON_PASSWORD, port=RCON_PORT, timeout=3) as mcr:
+                    # On demande la version au serveur
+                    resp = mcr.command("version")
+                    # On cherche un numéro de version type X.X.X dans la réponse
+                    match = re.search(r"version ([\d\.]+)", resp)
+                    if match:
+                        forge_version = match.group(1)
+                    
+                    # Si mcstatus a échoué mais que RCON répond, le serveur est ON
+                    if not online:
+                        online = True
+                        status_rcon = mcr.command("list")
+                        # Extraction basique des joueurs via RCON
+                        p_match = re.search(r"(\d+) of a max of (\d+)", status_rcon)
+                        if p_match:
+                            players_online = p_match.group(1)
+                            players_max = p_match.group(2)
+            except Exception as e:
+                print(f"[DEBUG] Erreur RCON: {e}")
+
+        # --- ÉTAPE 3 : Construction de l'Embed ---
+        if online:
+            color = discord.Color.green()
+            status_desc = "✅ **Serveur en ligne**"
         else:
-            uptime_str = "Impossible de récupérer"
-            start_str = "Impossible de récupérer"
+            color = discord.Color.red()
+            status_desc = "❌ **Serveur hors ligne**"
 
         embed = discord.Embed(
-            title="🌐 Statut du serveur",
-            description=status_text,
+            title="🌐 Statut Technique du Serveur",
+            description=status_desc,
             color=color
         )
-        embed.add_field(name="--- Serveur ---", value="\u200b", inline=False)
-        embed.add_field(name="Edition", value="Minecraft Java Edition", inline=True)
-        embed.add_field(name="Version", value=mc_version or "Impossible de récupérer", inline=True)
-        embed.add_field(name="Forge Version", value=forge_version or "Impossible de récupérer", inline=True)
-        embed.add_field(name="IP serveur", value=RCON_HOST_PLAYER or RCON_HOST, inline=True)
-        if ping_ms is not None:
-            embed.add_field(name="Ping du serveur", value=f"{ping_ms} ms", inline=True)
-        embed.add_field(name="Démarrage du serveur", value=start_str, inline=True)
-        embed.add_field(name="Durée de fonctionnement", value=uptime_str, inline=True)
-        if num_players is not None:
-            embed.add_field(name="Nombre de joueurs", value=str(num_players), inline=True)
 
-        await interaction.response.send_message(embed=embed)
+        embed.add_field(name="--- Informations ---", value="\u200b", inline=False)
+        embed.add_field(name="🎮 Édition", value="Java (Forge)", inline=True)
+        embed.add_field(name="📌 Version MC", value=mc_version, inline=True)
+        embed.add_field(name="🛠️ Version Forge", value=forge_version, inline=True)
+        
+        embed.add_field(name="--- Réseau ---", value="\u200b", inline=False)
+        embed.add_field(name="📡 IP", value=f"`{RCON_HOST_PLAYER}`", inline=True)
+        embed.add_field(name="⚡ Ping", value=ping, inline=True)
+        embed.add_field(name="👥 Joueurs", value=f"{players_online} / {players_max}", inline=True)
 
+        embed.set_footer(text=f"Demandé par {interaction.user.display_name} • {interaction.created_at.strftime('%H:%M:%S')}")
+        
+        # Envoi de la réponse finale
+        await interaction.edit_original_response(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Status(bot))
